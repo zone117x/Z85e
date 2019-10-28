@@ -5,6 +5,14 @@
     using CoenM.Encoding.Internals;
     using JetBrains.Annotations;
 
+#if !FEATURE_NULLABLE
+#nullable disable
+#else
+    using System.Diagnostics.CodeAnalysis;
+
+    using NotNullAttribute = System.Diagnostics.CodeAnalysis.NotNullAttribute;
+#endif
+
     /// <summary>
     /// Z85 Extended Encoding library. Z85 Extended doesn't require the length of the bytes to be a multiple of 4.
     /// </summary>
@@ -18,7 +26,16 @@
         /// <returns><c>null</c> when <paramref name="input"/> is null, otherwise bytes containing the decoded input string.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when length of <paramref name="input"/> is a multiple of 5 plus 1.</exception>
         [PublicAPI]
+        [CanBeNull]
+        [ContractAnnotation("null=>null; notnull=>notnull")]
+#if FEATURE_NULLABLE
+        [SuppressMessage("StyleCop.CSharp.SpacingRules", "SA1011:Closing square brackets should be spaced correctly", Justification = "C#8.0 feature")]
+        [return: NotNullIfNotNull("input")]
+        [return: MaybeNull]
+        public static unsafe byte[]? Decode([DisallowNull] string input)
+#else
         public static unsafe byte[] Decode([NotNull] string input)
+#endif
         {
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             // ReSharper disable once HeuristicUnreachableCode
@@ -97,7 +114,15 @@
         /// <param name="data">byte[] to encode. No restrictions on the length.</param>
         /// <returns>Encoded string or <c>null</c> when the <paramref name="data"/> was null.</returns>
         [PublicAPI]
+        [ContractAnnotation("null=>null; notnull=>notnull")]
+        [CanBeNull]
+#if FEATURE_NULLABLE
+        [return: NotNullIfNotNull("data")]
+        [return: MaybeNull]
+        public static unsafe string? Encode([DisallowNull] byte[] data)
+#else
         public static unsafe string Encode([NotNull] byte[] data)
+#endif
         {
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             // ReSharper disable once HeuristicUnreachableCode
