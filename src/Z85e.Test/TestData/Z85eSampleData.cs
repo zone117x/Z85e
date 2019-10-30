@@ -12,7 +12,7 @@
                 0 => string.Empty,
                 1 => "H", // should not be possible
                 2 => "1N",
-                3 => "4 =>H",
+                3 => "4:H",
                 4 => "esp$",
                 5 => "Hello",
                 6 => "HelloW", // should not be possible
