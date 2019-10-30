@@ -8,7 +8,8 @@
         public static string CreateSha256Base64Encoded(string input)
         {
             var bytes = System.Text.Encoding.Unicode.GetBytes(input);
-            return Convert.ToBase64String(new SHA256Managed().ComputeHash(bytes));
+            using var sha256Managed = new SHA256Managed();
+            return Convert.ToBase64String(sha256Managed.ComputeHash(bytes));
         }
 
         public static byte[] CreatePseudoRandomByteArray(uint size, int seed)
