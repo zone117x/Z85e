@@ -29,7 +29,6 @@
     <CodeAnalysisRuleSet>..\..\Z85e.ruleset</CodeAnalysisRuleSet>
     <LangVersion>8.0</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' != 'netstandard1.0'">
@@ -37,7 +36,8 @@
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-     <DefineConstants>$(DefineConstants);FEATURE_NULLABLE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_NULLABLE</DefineConstants>
+    <Nullable>enable</Nullable>
   </PropertyGroup>  
   
   <ItemGroup>

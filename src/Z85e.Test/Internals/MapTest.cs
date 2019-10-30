@@ -28,7 +28,7 @@
         public void GenerateDecoderTableTest()
         {
             var decoder = GenerateDecoder();
-            var sw = new StringWriter();
+            using var sw = new StringWriter();
             GenerateDecoderTableInCSharp(decoder, 0, 128, 8, sw);
             output.WriteLine(sw.ToString());
         }
