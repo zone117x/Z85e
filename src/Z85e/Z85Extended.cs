@@ -151,7 +151,7 @@
 #if FEATURE_NULLABLE
         [return: NotNullIfNotNull("data")]
         [return: MaybeNull]
-        public static unsafe string? Encode([DisallowNull] byte[] data)
+        public static string? Encode([DisallowNull] byte[] data)
 #else
         public static unsafe string Encode([NotNull] byte[] data)
 #endif
@@ -163,21 +163,27 @@
 
             var size = data.Length;
             var remainder = size % 4;
-
-            if (remainder == 0)
-                return Z85.Encode(data);
-
-            // one byte -> two chars
-            // two bytes -> three chars
-            // three byte -> four chars
-            var extraChars = remainder + 1;
-
-            var encodedSize = ((size - remainder) * 5 / 4) + extraChars;
-            var destination = new string('0', encodedSize);
-            uint charNbr = 0;
+            int charNbr = 0;
             uint byteNbr = 0;
+            char[] destination;
+            int len;
+            if (remainder == 0)
+            {
+                len = size;
+                destination = new char[size * 5 / 4]; // new string('0', size * 5 / 4);
+            }
+            else
+            {
+                // one byte -> two chars
+                // two bytes -> three chars
+                // three byte -> four chars
+                var extraChars = remainder + 1;
 
-            var size2 = size - remainder;
+                var encodedSize = ((size - remainder) * 5 / 4) + extraChars;
+                destination = new char[encodedSize]; // new string('0', encodedSize);
+                var size2 = size - remainder;
+                len = size2;
+            }
 
             const uint divisor4 = 85 * 85 * 85 * 85;
             const uint divisor3 = 85 * 85 * 85;
@@ -188,28 +194,30 @@
             const int byte1 = 256;
 
             // Get pointers to avoid unnecessary range checking
-            fixed (char* z85Encoder = Map.Encoder)
-            fixed (char* z85Dest = destination)
+            ReadOnlySpan<char> z85Encoder = Map.Encoder;
+            Span<char> z85Dest = destination;
+
+            uint value;
+            while (byteNbr < len)
             {
-                uint value;
-                while (byteNbr < size2)
-                {
-                    // Accumulate value in base 256 (binary)
-                    value = (uint)((data[byteNbr + 0] * byte3) +
-                                   (data[byteNbr + 1] * byte2) +
-                                   (data[byteNbr + 2] * byte1) +
-                                   data[byteNbr + 3]);
-                    byteNbr += 4;
+                // Accumulate value in base 256 (binary)
+                value = (uint)((data[byteNbr + 0] * byte3) +
+                                (data[byteNbr + 1] * byte2) +
+                                (data[byteNbr + 2] * byte1) +
+                                data[byteNbr + 3]);
+                byteNbr += 4;
 
-                    // Output value in base 85
-                    z85Dest[charNbr + 0] = z85Encoder[(value / divisor4) % 85];
-                    z85Dest[charNbr + 1] = z85Encoder[(value / divisor3) % 85];
-                    z85Dest[charNbr + 2] = z85Encoder[(value / divisor2) % 85];
-                    z85Dest[charNbr + 3] = z85Encoder[(value / divisor1) % 85];
-                    z85Dest[charNbr + 4] = z85Encoder[value % 85];
-                    charNbr += 5;
-                }
+                // Output value in base 85
+                z85Dest[charNbr + 0] = z85Encoder[(byte)((value / divisor4) % 85)];
+                z85Dest[charNbr + 1] = z85Encoder[(byte)((value / divisor3) % 85)];
+                z85Dest[charNbr + 2] = z85Encoder[(byte)((value / divisor2) % 85)];
+                z85Dest[charNbr + 3] = z85Encoder[(byte)((value / divisor1) % 85)];
+                z85Dest[charNbr + 4] = z85Encoder[(byte)(value % 85)];
+                charNbr += 5;
+            }
 
+            if (remainder != 0)
+            {
                 // Take care of the remainder.
                 value = 0;
                 while (byteNbr < size)
@@ -218,12 +226,12 @@
                 var divisor = (uint)Math.Pow(85, remainder);
                 while (divisor != 0)
                 {
-                    z85Dest[charNbr++] = z85Encoder[(value / divisor) % 85];
+                    z85Dest[charNbr++] = z85Encoder[(char)((value / divisor) % 85)];
                     divisor /= 85;
                 }
             }
 
-            return destination;
+            return new string(destination);
         }
     }
 }
