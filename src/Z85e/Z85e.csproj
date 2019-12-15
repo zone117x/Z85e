@@ -5,7 +5,7 @@
     <Version>1.1.1</Version>
     <Description>ZeroMQ's Z85 Encoding and the extended version. Formats for representing binary data as printable text.</Description>
     <Authors>Coen van den Munckhof</Authors>
-    <TargetFrameworks>netstandard1.0;netstandard1.1;netstandard2.0;netstandard2.1;netcoreapp2.0;netcoreapp2.1;net461</TargetFrameworks>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <RootNamespace>CoenM.Encoding</RootNamespace>
@@ -23,6 +23,8 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <!-- Used by SourceLink -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <DefineConstants>$(DefineConstants);FEATURE_NULLABLE;FEATURE_SPAN;</DefineConstants>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -30,15 +32,6 @@
     <LangVersion>8.0</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' != 'netstandard1.0'">
-     <DefineConstants>$(DefineConstants);FEATURE_SPAN</DefineConstants>
-  </PropertyGroup>
-  
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-    <DefineConstants>$(DefineConstants);FEATURE_NULLABLE</DefineConstants>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>  
   
   <ItemGroup>
     <PackageReference Include="GitVersionTask" Version="5.0.1">
