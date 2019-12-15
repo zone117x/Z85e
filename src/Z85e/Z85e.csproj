@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\..\netfx.props" />
-    
+  
   <PropertyGroup>
     <!-- do not manually update version, this will be done using appvayor -->
     <Version>1.1.1</Version>
@@ -25,14 +25,31 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <!-- Used by SourceLink -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <DefineConstants>$(DefineConstants);FEATURE_NULLABLE;FEATURE_SPAN;</DefineConstants>
-    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\..\Z85e.ruleset</CodeAnalysisRuleSet>
     <LangVersion>8.0</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' != 'netstandard1.0'">
+     <DefineConstants>$(DefineConstants);FEATURE_SPAN</DefineConstants>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <DefineConstants>$(DefineConstants);FEATURE_NULLABLE</DefineConstants>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
+    <DefineConstants>$(DefineConstants);FEATURE_NULLABLE</DefineConstants>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+    <DefineConstants>$(DefineConstants);FEATURE_NULLABLE</DefineConstants>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   
   <ItemGroup>
@@ -67,21 +84,21 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
     <PackageReference Include="System.Memory" Version="4.5.3" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.2" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.7.0" />
   </ItemGroup>  
   
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
     <PackageReference Include="System.Memory" Version="4.5.3" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.2" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.7.0" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.2" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.7.0" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
     <PackageReference Include="System.Memory" Version="4.5.3" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.2" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.7.0" />
   </ItemGroup>    
 
 </Project>
