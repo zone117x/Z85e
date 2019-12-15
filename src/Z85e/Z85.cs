@@ -3,7 +3,6 @@
     using System;
 
     using CoenM.Encoding.Internals;
-    using JetBrains.Annotations;
 
 #if !FEATURE_NULLABLE
 #nullable disable
@@ -26,9 +25,6 @@
         /// <param name="input">encoded string. Should have length multiple of 5.</param>
         /// <returns><c>null</c> when input is null, otherwise bytes containing the decoded input string.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when length of <paramref name="input"/> is not a multiple of 5.</exception>
-        [PublicAPI]
-        [CanBeNull]
-        [ContractAnnotation("null=>null; notnull=>notnull")]
 #if FEATURE_NULLABLE
         [SuppressMessage("StyleCop.CSharp.SpacingRules", "SA1011:Closing square brackets should be spaced correctly", Justification = "C#8.0 feature")]
         [return: NotNullIfNotNull("input")]
@@ -86,8 +82,6 @@
         /// <returns>Encoded string or <c>null</c> when the <paramref name="data"/> was null.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when length of <paramref name="data"/> is not a multiple of 4.</exception>
         // [System.Security.SecuritySafeCritical]
-        [ContractAnnotation("null=>null; notnull=>notnull")]
-        [CanBeNull]
 #if FEATURE_NULLABLE
         [return: NotNullIfNotNull("data")]
         [return: MaybeNull]

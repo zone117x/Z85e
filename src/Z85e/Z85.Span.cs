@@ -8,7 +8,6 @@
     using System.Runtime.InteropServices;
 
     using CoenM.Encoding.Internals;
-    using JetBrains.Annotations;
 
     public static partial class Z85
     {
@@ -31,7 +30,6 @@
         ///   or if the input is incomplete (i.e. not a multiple of 4) and isFinalBlock is true.</description></item>
         ///   </list>
         /// </returns>
-        [PublicAPI]
         public static OperationStatus Decode(
             ReadOnlySpan<char> source,
             Span<byte> destination,
@@ -152,7 +150,6 @@
         ///   </list>
         /// It does not return <see cref="OperationStatus.InvalidData"/> since that is not possible for Z85 encoding.
         /// </returns>
-        [PublicAPI]
         public static OperationStatus Encode(
             ReadOnlySpan<byte> source,
             Span<char> destination,
@@ -243,7 +240,6 @@
         /// </summary>
         /// <param name="source">Input to decode.</param>
         /// <returns>Byte length required to decode the given source <paramref name="source"/>.</returns>
-        [PublicAPI]
         public static int GetDecodedSize(ReadOnlySpan<char> source) => GetDecodedSize(source.Length);
 
         /// <summary>
@@ -252,7 +248,6 @@
         /// <param name="sourceLength">Input size to decode. Should be positive.</param>
         /// <returns>Byte length required to decode the given source length.</returns>
         /// <exception cref="System.ArgumentOutOfRangeException">Thrown when the specified <paramref name="sourceLength"/> is less then <c>0</c>.</exception>
-        [PublicAPI]
         public static int GetDecodedSize(int sourceLength)
         {
             if (sourceLength < 0)
@@ -271,7 +266,6 @@
         /// </summary>
         /// <param name="source">Input to encode.</param>
         /// <returns>Character length required to encode the given source <paramref name="source"/>.</returns>
-        [PublicAPI]
         public static int GetEncodedSize(ReadOnlySpan<byte> source) => GetEncodedSize(source.Length);
 
         /// <summary>
@@ -280,7 +274,6 @@
         /// <param name="sourceLength">Input size to encode. Should be positive.</param>
         /// <returns>Character length required to encode the given source length.</returns>
         /// <exception cref="System.ArgumentOutOfRangeException">Thrown when the specified <paramref name="sourceLength"/> is less then <c>0</c>.</exception>
-        [PublicAPI]
         public static int GetEncodedSize(int sourceLength)
         {
             if (sourceLength < 0)

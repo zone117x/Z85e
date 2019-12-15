@@ -17,7 +17,6 @@
     {
         public static IEnumerable<object[]> Data
         {
-            [UsedImplicitly]
             get
             {
                 foreach (var seed in new[] { 42, 54, 550 })

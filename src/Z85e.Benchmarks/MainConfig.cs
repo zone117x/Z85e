@@ -84,11 +84,14 @@
         /// <remarks>taken from <seealso href="https://github.com/dotnet/BenchmarkDotNet/blob/master/src/BenchmarkDotNet/Columns/DefaultColumnProvider.cs"/>.</remarks>>
         private class DiagnosersColumnProvider : IColumnProvider
         {
+            /*
             public IEnumerable<IColumn> GetColumns(Summary summary) => summary
                 .Config
                 .GetDiagnosers()
                 .Select(d => d.GetColumnProvider())
                 .SelectMany(cp => cp.GetColumns(summary));
+            */
+            public IEnumerable<IColumn> GetColumns(Summary summary) => summary.GetColumns();
         }
     }
 }
