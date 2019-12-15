@@ -92,6 +92,29 @@
         }
 
         /// <summary>
+        /// Calculates the length of the encoded output string length.
+        /// </summary>
+        /// <param name="dataLength"></param>
+        /// <returns>Length of the encoded output string</returns>
+        [PublicAPI]
+        public static int GetEncodedSize(int dataLength)
+        {
+            var size = dataLength;
+            var remainder = size % 4;
+            if (remainder == 0)
+            {
+                return dataLength * 5 / 4;
+            }
+            // one byte -> two chars
+            // two bytes -> three chars
+            // three byte -> four chars
+            var extraChars = remainder + 1;
+
+            var encodedSize = ((size - remainder) * 5 / 4) + extraChars;
+            return encodedSize;
+        }
+
+        /// <summary>
         /// Encode a byte array as a string. Output size will roughly be 'length of <paramref name="data"/>' / 4 * 5.
         /// </summary>
         /// <param name="data">byte[] to encode. No restrictions on the length.</param>
