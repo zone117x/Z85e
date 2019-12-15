@@ -1,11 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="..\..\netfx.props" />
+    
   <PropertyGroup>
     <!-- do not manually update version, this will be done using appvayor -->
     <Version>1.1.1</Version>
     <Description>ZeroMQ's Z85 Encoding and the extended version. Formats for representing binary data as printable text.</Description>
     <Authors>Coen van den Munckhof</Authors>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFrameworks>netstandard1.0;netstandard1.1;netstandard2.0;netstandard2.1;netcoreapp2.0;netcoreapp2.1;netcoreapp3.0;netcoreapp3.1;net461</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <RootNamespace>CoenM.Encoding</RootNamespace>
