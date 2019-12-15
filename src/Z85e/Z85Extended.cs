@@ -17,6 +17,12 @@
     /// </summary>
     public static class Z85Extended
     {
+        // Get pointers to avoid unnecessary range checking
+        private static readonly ReadOnlyMemory<char> Z85EncoderMap = Map.Encoder;
+
+        // Get a pointers to avoid unnecessary range checking
+        private static readonly ReadOnlyMemory<byte> Z85DecoderMap = Map.Decoder;
+
         /// <summary>
         /// Decode an encoded string into a byte array. Output size will roughly be 'length of <paramref name="input"/>' * 4 / 5.
         /// </summary>
@@ -38,19 +44,20 @@
             if (input == null)
                 return null;
 
-            var size = (uint)input.Length;
-            var remainder = size % 5;
+            var inputLength = input.Length;
+            var remainder = inputLength % 5;
 
             int decodedSize;
-            uint extraBytes = 0;
+            int extraBytes;
             if (remainder == 0)
             {
-                decodedSize = input.Length * 4 / 5;
+                extraBytes = 0;
+                decodedSize = inputLength * 4 / 5;
             }
             else
             {
                 extraBytes = remainder - 1;
-                decodedSize = (int)(((size - extraBytes) * 4 / 5) + extraBytes);
+                decodedSize = ((inputLength - extraBytes) * 4 / 5) + extraBytes;
             }
 
             // two chars are decoded to one byte
@@ -60,7 +67,7 @@
             if (remainder == 1)
                 throw new ArgumentException("Input length % 5 cannot be 1.");
 
-            var decoded = new byte[decodedSize];
+            byte[] decoded = new byte[decodedSize];
 
             uint byteNbr = 0;
             int charNbr = 0;
@@ -70,19 +77,10 @@
             const uint divisor2 = 256 * 256;
             const uint divisor1 = 256;
 
-            uint len = 0;
-            if (remainder == 0)
-            {
-                len = (uint)input.Length;
-            }
-            else
-            {
-                len = size - remainder;
-            }
+            int len = inputLength - remainder;
 
-            // Get a pointers to avoid unnecessary range checking
-            Span<byte> z85Decoder = Map.Decoder;
             ReadOnlySpan<char> src = input;
+            ReadOnlySpan<byte> z85Decoder = Z85DecoderMap.Span;
 
             while (charNbr < len)
             {
@@ -102,10 +100,10 @@
                 byteNbr += 4;
             }
 
-            if (remainder != 0)
+            if (extraBytes != 0)
             {
                 value = 0;
-                while (charNbr < size)
+                while (charNbr < inputLength)
                     value = (value * 85) + Map.Decoder[(byte)input[charNbr++]];
 
                 // Take care of the remainder.
@@ -165,12 +163,12 @@
             var remainder = size % 4;
             int charNbr = 0;
             uint byteNbr = 0;
-            char[] destination;
+            Span<char> z85Dest;
             int len;
             if (remainder == 0)
             {
                 len = size;
-                destination = new char[size * 5 / 4]; // new string('0', size * 5 / 4);
+                z85Dest = new char[size * 5 / 4];
             }
             else
             {
@@ -180,7 +178,7 @@
                 var extraChars = remainder + 1;
 
                 var encodedSize = ((size - remainder) * 5 / 4) + extraChars;
-                destination = new char[encodedSize]; // new string('0', encodedSize);
+                z85Dest = new char[encodedSize];
                 var size2 = size - remainder;
                 len = size2;
             }
@@ -193,9 +191,7 @@
             const int byte2 = 256 * 256;
             const int byte1 = 256;
 
-            // Get pointers to avoid unnecessary range checking
-            ReadOnlySpan<char> z85Encoder = Map.Encoder;
-            Span<char> z85Dest = destination;
+            ReadOnlySpan<char> z85Encoder = Z85EncoderMap.Span;
 
             uint value;
             while (byteNbr < len)
@@ -231,7 +227,8 @@
                 }
             }
 
-            return new string(destination);
+            // Fast Span<char> to String cast.
+            return z85Dest.ToString();
         }
     }
 }
