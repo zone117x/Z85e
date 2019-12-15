@@ -15,7 +15,7 @@
     /// <summary>
     /// Z85 Extended Encoding library. Z85 Extended doesn't require the length of the bytes to be a multiple of 4.
     /// </summary>
-    public static partial class Z85Extended
+    public static class Z85Extended
     {
         /// <summary>
         /// Decode an encoded string into a byte array. Output size will roughly be 'length of <paramref name="input"/>' * 4 / 5.
@@ -28,7 +28,7 @@
         [SuppressMessage("StyleCop.CSharp.SpacingRules", "SA1011:Closing square brackets should be spaced correctly", Justification = "C#8.0 feature")]
         [return: NotNullIfNotNull("input")]
         [return: MaybeNull]
-        public static unsafe byte[]? Decode([DisallowNull] string input)
+        public static byte[]? Decode([DisallowNull] string input)
 #else
         public static unsafe byte[] Decode([NotNull] string input)
 #endif
@@ -41,8 +41,17 @@
             var size = (uint)input.Length;
             var remainder = size % 5;
 
+            int decodedSize;
+            uint extraBytes = 0;
             if (remainder == 0)
-                return Z85.Decode(input);
+            {
+                decodedSize = input.Length * 4 / 5;
+            }
+            else
+            {
+                extraBytes = remainder - 1;
+                decodedSize = (int)(((size - extraBytes) * 4 / 5) + extraBytes);
+            }
 
             // two chars are decoded to one byte
             // thee chars to two bytes
@@ -51,54 +60,61 @@
             if (remainder == 1)
                 throw new ArgumentException("Input length % 5 cannot be 1.");
 
-            var extraBytes = remainder - 1;
-            var decodedSize = (int)(((size - extraBytes) * 4 / 5) + extraBytes);
-
             var decoded = new byte[decodedSize];
 
             uint byteNbr = 0;
-            uint charNbr = 0;
+            int charNbr = 0;
             uint value;
 
             const uint divisor3 = 256 * 256 * 256;
             const uint divisor2 = 256 * 256;
             const uint divisor1 = 256;
 
-            var size2 = size - remainder;
-
-            // Get a pointers to avoid unnecessary range checking
-            fixed (byte* z85Decoder = Map.Decoder)
-            fixed (char* src = input)
+            uint len = 0;
+            if (remainder == 0)
             {
-                while (charNbr < size2)
-                {
-                    // Accumulate value in base 85
-                    value = z85Decoder[(byte)src[charNbr]];
-                    value = (value * 85) + z85Decoder[(byte)src[charNbr + 1]];
-                    value = (value * 85) + z85Decoder[(byte)src[charNbr + 2]];
-                    value = (value * 85) + z85Decoder[(byte)src[charNbr + 3]];
-                    value = (value * 85) + z85Decoder[(byte)src[charNbr + 4]];
-                    charNbr += 5;
-
-                    // Output value in base 256
-                    decoded[byteNbr + 0] = (byte)((value / divisor3) % 256);
-                    decoded[byteNbr + 1] = (byte)((value / divisor2) % 256);
-                    decoded[byteNbr + 2] = (byte)((value / divisor1) % 256);
-                    decoded[byteNbr + 3] = (byte)(value % 256);
-                    byteNbr += 4;
-                }
+                len = (uint)input.Length;
+            }
+            else
+            {
+                len = size - remainder;
             }
 
-            value = 0;
-            while (charNbr < size)
-                value = (value * 85) + Map.Decoder[(byte)input[(int)charNbr++]];
+            // Get a pointers to avoid unnecessary range checking
+            Span<byte> z85Decoder = Map.Decoder;
+            ReadOnlySpan<char> src = input;
 
-            // Take care of the remainder.
-            var divisor = (uint)Math.Pow(256, extraBytes - 1);
-            while (divisor != 0)
+            while (charNbr < len)
             {
-                decoded[byteNbr++] = (byte)((value / divisor) % 256);
-                divisor /= 256;
+                // Accumulate value in base 85
+                value = z85Decoder[(byte)src[charNbr]];
+                value = (value * 85) + z85Decoder[(byte)src[charNbr + 1]];
+                value = (value * 85) + z85Decoder[(byte)src[charNbr + 2]];
+                value = (value * 85) + z85Decoder[(byte)src[charNbr + 3]];
+                value = (value * 85) + z85Decoder[(byte)src[charNbr + 4]];
+                charNbr += 5;
+
+                // Output value in base 256
+                decoded[byteNbr + 0] = (byte)((value / divisor3) % 256);
+                decoded[byteNbr + 1] = (byte)((value / divisor2) % 256);
+                decoded[byteNbr + 2] = (byte)((value / divisor1) % 256);
+                decoded[byteNbr + 3] = (byte)(value % 256);
+                byteNbr += 4;
+            }
+
+            if (remainder != 0)
+            {
+                value = 0;
+                while (charNbr < size)
+                    value = (value * 85) + Map.Decoder[(byte)input[charNbr++]];
+
+                // Take care of the remainder.
+                var divisor = (uint)Math.Pow(256, extraBytes - 1);
+                while (divisor != 0)
+                {
+                    decoded[byteNbr++] = (byte)((value / divisor) % 256);
+                    divisor /= 256;
+                }
             }
 
             return decoded;

@@ -176,7 +176,8 @@
 
             while (sourceIndex <= maxSrcLength)
             {
-                EncodeBlockSpan(ref Unsafe.Add(ref src, sourceIndex), ref Unsafe.Add(ref dst, destIndex), ref encoder);
+                // EncodeBlockSpan(ref Unsafe.Add(ref src, sourceIndex), ref Unsafe.Add(ref dst, destIndex), ref encoder);
+                EncodeBlockSpan(source, sourceIndex, destination, destIndex, Map.Encoder);
                 sourceIndex += 4;
                 destIndex += 5;
             }
@@ -288,24 +289,24 @@
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void EncodeBlockSpan(ref byte sourceFourBytes, ref char destination, ref char z85Encoder)
+        private static void EncodeBlockSpan(ReadOnlySpan<byte> sourceFourBytes, int sourceOffset, Span<char> destination, int destIndex, ReadOnlySpan<char> z85Encoder)
         {
             const uint divisor4 = 85 * 85 * 85 * 85;
             const uint divisor3 = 85 * 85 * 85;
             const uint divisor2 = 85 * 85;
             const uint divisor1 = 85;
 
-            var value = (uint)((sourceFourBytes << 24) +
-                               (Unsafe.Add(ref sourceFourBytes, 1) << 16) +
-                               (Unsafe.Add(ref sourceFourBytes, 2) << 8) +
-                               (Unsafe.Add(ref sourceFourBytes, 3) << 0));
+            uint value = (uint)((sourceFourBytes[sourceOffset] << 24) +
+                                (sourceFourBytes[sourceOffset + 1] << 16) +
+                                (sourceFourBytes[sourceOffset + 2] << 8) +
+                                (sourceFourBytes[sourceOffset + 3] << 0));
 
             // Output value in base 85
-            Unsafe.Add(ref destination, 0) = Unsafe.Add(ref z85Encoder, (int)((value / divisor4) % 85));
-            Unsafe.Add(ref destination, 1) = Unsafe.Add(ref z85Encoder, (int)((value / divisor3) % 85));
-            Unsafe.Add(ref destination, 2) = Unsafe.Add(ref z85Encoder, (int)((value / divisor2) % 85));
-            Unsafe.Add(ref destination, 3) = Unsafe.Add(ref z85Encoder, (int)((value / divisor1) % 85));
-            Unsafe.Add(ref destination, 4) = Unsafe.Add(ref z85Encoder, (int)(value % 85));
+            destination[destIndex] = z85Encoder[(int)((value / divisor4) % 85)];
+            destination[destIndex + 1] = z85Encoder[(int)((value / divisor3) % 85)];
+            destination[destIndex + 2] = z85Encoder[(int)((value / divisor2) % 85)];
+            destination[destIndex + 3] = z85Encoder[(int)((value / divisor1) % 85)];
+            destination[destIndex + 4] = z85Encoder[(int)(value % 85)];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
