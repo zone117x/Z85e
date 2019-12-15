@@ -12,6 +12,45 @@
     public class Z85ExtendedTest
     {
         [Fact]
+        public void _RandConsistencyChecks()
+        {
+            var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+            for (var i = 0; i < 10000; i++)
+            {
+                var inputData = new byte[i];
+                rng.GetBytes(inputData);
+                var expectedSize = Sut.GetEncodedSize(inputData.Length);
+                var encodedResult = Sut.Encode(inputData);
+                var encodedSize = System.Text.Encoding.ASCII.GetByteCount(encodedResult);
+
+                Assert.Equal(expectedSize, encodedSize);
+                var decodedData = Sut.Decode(encodedResult);
+
+                var inputHex = BitConverter.ToString(inputData);
+                var outputHex = BitConverter.ToString(decodedData);
+                Assert.Equal(inputHex, outputHex);
+            }
+        }
+
+        [Fact]
+        public void _LargeDataTest()
+        {
+            var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+            var inputData = new byte[1024 * 1024 * 20];
+            rng.GetBytes(inputData);
+            var expectedSize = Sut.GetEncodedSize(inputData.Length);
+            var encodedResult = Sut.Encode(inputData);
+            var encodedSize = System.Text.Encoding.ASCII.GetByteCount(encodedResult);
+
+            Assert.Equal(expectedSize, encodedSize);
+            var decodedData = Sut.Decode(encodedResult);
+
+            var inputHex = BitConverter.ToString(inputData);
+            var outputHex = BitConverter.ToString(decodedData);
+            Assert.Equal(inputHex, outputHex);
+        }
+
+        [Fact]
         public void HelloWorldDecodeTest()
         {
             Assert.Equal(Sut.Decode(StrictZ85Samples.HelloWorldEncoded), StrictZ85Samples.HelloWorldData);
