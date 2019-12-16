@@ -27,6 +27,7 @@
             Add(defaultJob.With(CsProjClassicNetToolchain.Net471).WithId("Net471"));
             Add(defaultJob.With(CsProjCoreToolchain.NetCoreApp20).WithId("Core20"));
             Add(defaultJob.With(CsProjCoreToolchain.NetCoreApp21).WithId("Core21"));
+            Add(defaultJob.With(CsProjCoreToolchain.NetCoreApp31).WithId("Core31"));
 
             // Extra diagnoser
             Add(MemoryDiagnoser.Default);
@@ -35,7 +36,7 @@
             // Add(DefaultColumnProviders.Instance);
             Add(new MinimalColumnProvider());
             Add(new ParamsColumnProvider());
-            Add(new DiagnosersColumnProvider());
+            /*Add(new DiagnosersColumnProvider());*/
             /*Add(RankColumn.Arabic);*/
 
             // Ordering
@@ -81,17 +82,16 @@
                 .Select(name => new ParamColumn(name));
         }
 
+        /*
         /// <remarks>taken from <seealso href="https://github.com/dotnet/BenchmarkDotNet/blob/master/src/BenchmarkDotNet/Columns/DefaultColumnProvider.cs"/>.</remarks>>
         private class DiagnosersColumnProvider : IColumnProvider
         {
-            /*
             public IEnumerable<IColumn> GetColumns(Summary summary) => summary
                 .Config
                 .GetDiagnosers()
                 .Select(d => d.GetColumnProvider())
                 .SelectMany(cp => cp.GetColumns(summary));
-            */
-            public IEnumerable<IColumn> GetColumns(Summary summary) => summary.GetColumns();
         }
+        */
     }
 }

@@ -3,6 +3,7 @@
     using System;
 
     using CoenM.Encoding.Internals;
+    using JetBrains.Annotations;
 
 #if !FEATURE_NULLABLE
 #nullable disable
@@ -15,14 +16,8 @@
     /// <summary>
     /// Z85 Extended Encoding library. Z85 Extended doesn't require the length of the bytes to be a multiple of 4.
     /// </summary>
-    public static class Z85Extended
+    public static partial class Z85Extended
     {
-        // Get pointers to avoid unnecessary range checking
-        private static readonly ReadOnlyMemory<char> Z85EncoderMap = Map.Encoder;
-
-        // Get a pointers to avoid unnecessary range checking
-        private static readonly ReadOnlyMemory<byte> Z85DecoderMap = Map.Decoder;
-
         /// <summary>
         /// Decode an encoded string into a byte array. Output size will roughly be 'length of <paramref name="input"/>' * 4 / 5.
         /// </summary>
@@ -30,6 +25,9 @@
         /// <param name="input">encoded string.</param>
         /// <returns><c>null</c> when <paramref name="input"/> is null, otherwise bytes containing the decoded input string.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when length of <paramref name="input"/> is a multiple of 5 plus 1.</exception>
+        [PublicAPI]
+        [CanBeNull]
+        [ContractAnnotation("null=>null; notnull=>notnull")]
 #if FEATURE_NULLABLE
         [SuppressMessage("StyleCop.CSharp.SpacingRules", "SA1011:Closing square brackets should be spaced correctly", Justification = "C#8.0 feature")]
         [return: NotNullIfNotNull("input")]
@@ -79,8 +77,8 @@
 
             int len = inputLength - remainder;
 
-            ReadOnlySpan<char> src = input;
-            ReadOnlySpan<byte> z85Decoder = Z85DecoderMap.Span;
+            var src = input;
+            var z85Decoder = Map.Decoder;
 
             while (charNbr < len)
             {
@@ -146,6 +144,9 @@
         /// </summary>
         /// <param name="data">byte[] to encode. No restrictions on the length.</param>
         /// <returns>Encoded string or <c>null</c> when the <paramref name="data"/> was null.</returns>
+        [PublicAPI]
+        [ContractAnnotation("null=>null; notnull=>notnull")]
+        [CanBeNull]
 #if FEATURE_NULLABLE
         [return: NotNullIfNotNull("data")]
         [return: MaybeNull]
@@ -163,7 +164,11 @@
             var remainder = size % 4;
             int charNbr = 0;
             uint byteNbr = 0;
+#if FEATURE_SPAN
             Span<char> z85Dest;
+#else
+            char[] z85Dest;
+#endif
             int len;
             if (remainder == 0)
             {
@@ -176,11 +181,9 @@
                 // two bytes -> three chars
                 // three byte -> four chars
                 var extraChars = remainder + 1;
-
                 var encodedSize = ((size - remainder) * 5 / 4) + extraChars;
                 z85Dest = new char[encodedSize];
-                var size2 = size - remainder;
-                len = size2;
+                len = size - remainder;
             }
 
             const uint divisor4 = 85 * 85 * 85 * 85;
@@ -191,7 +194,7 @@
             const int byte2 = 256 * 256;
             const int byte1 = 256;
 
-            ReadOnlySpan<char> z85Encoder = Z85EncoderMap.Span;
+            var z85Encoder = Map.Encoder;
 
             uint value;
             while (byteNbr < len)
@@ -226,9 +229,11 @@
                     divisor /= 85;
                 }
             }
-
-            // Fast Span<char> to String cast.
+#if FEATURE_SPAN
             return z85Dest.ToString();
+#else
+            return new string(z85Dest);
+#endif
         }
     }
 }

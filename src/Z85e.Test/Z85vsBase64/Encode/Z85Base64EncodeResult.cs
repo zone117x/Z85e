@@ -21,13 +21,13 @@
             ByteBlocksWritten = byteBlocksWritten;
         }
 
-        public string Status => status.ToString();
+        [PublicAPI] public string Status => status.ToString();
 
-        public int CharactersBlocksConsumed { get; }
+        [PublicAPI] public int CharactersBlocksConsumed { get; }
 
-        public bool AllCharsConsumed { get; }
+        [PublicAPI] public bool AllCharsConsumed { get; }
 
-        public int ByteBlocksWritten { get; }
+        [PublicAPI] public int ByteBlocksWritten { get; }
 
         public override string ToString()
         {

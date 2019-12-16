@@ -1,5 +1,4 @@
-﻿#if WEIRD_TESTS
-namespace CoenM.Encoding.Test.Z85vsBase64.Encode
+﻿namespace CoenM.Encoding.Test.Z85vsBase64.Encode
 {
     using FluentAssertions;
     using Xunit;
@@ -52,4 +51,3 @@ namespace CoenM.Encoding.Test.Z85vsBase64.Encode
         }
     }
 }
-#endif
